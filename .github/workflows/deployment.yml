@@ -1,0 +1,59 @@
+name: sample dotnet project
+on:
+    push:
+        branches:
+            - main
+            - features
+    pull_request:
+        branches:
+            - main
+            - featres
+    workflow_dispatch:      
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: get code
+              uses: actions/checkout@v7
+            - name: install node.js
+              uses: actions/setup-node@v7
+              with:
+                node-version: 24
+            - name: install dependencies
+              run: npm ci
+            - name: run tests
+              run: npm test
+    build:
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+            - name: get code
+              uses: actions/checkout@v7
+            - name: install node.js
+              uses: actions/setup-node@v7
+              with:
+                node-version: 24
+            - name: install dependecies
+              run: npm ci
+            - name: build artifact
+              run: npm run build
+            - name: upload build artifact
+              uses: actions/upload-artifact@v7
+              with:
+                name: dist-file
+                path: dist
+    deploy:
+        needs: build
+        runs-on: ubuntu-latest
+        steps:
+            - name: download artifact
+              uses: actions/download-artifact@v8
+              with:
+                name: dist-file
+            - name: list files
+              run: ls -la
+            - name: deploy
+              run: |
+               echo "deploying............"
+               echo "deploying succeed"      
+
